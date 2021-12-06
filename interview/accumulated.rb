@@ -8,17 +8,17 @@ def accumulate(init, list, &block)
   end
 end
 
-# def sum_of_squares(list)
-#   i = list.length
-#   i.times do |n|
-#     squares << accumulate(list, { |n| n ** 2 } )
-#   end
-#   squares.sum
-# end
+def sum_of_squares(list)
+  i = list.length
+  i.times do |n|
+    squares << accumulate(list, { |n| n ** 2 } )
+  end
+  squares.sum
+end
 
-# def sum_of_squares(list)
-#   accumulate(list, list.sum(0.0){ |e| e ** 2 } )
-# end
+def sum_of_squares(list)
+  accumulate(list, list.sum(0.0){ |e| e ** 2 } )
+end
 
 
 
