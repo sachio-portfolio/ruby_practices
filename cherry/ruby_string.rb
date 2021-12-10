@@ -6,11 +6,39 @@ puts 'Hello, ' + name + '!' # +演算子で文字列連結
 puts "Hello, \#{name}!"
 puts 'He said, "Don\'t speak."' # シングルクウォートの中にシングルクウォート
 puts "He said, \"Don't speak.\"" # ダブルクウォートの中にダブルクウォート
-
+# 文字列中でバックスラッシュの後に記述する文字によっては特別な意味を持たせる事ができる
+# \t #=> タブ \n #=> 改行 など
+puts "シ\n"
+puts "\tン\n"
+puts "\t\tジ\n"
+puts "\t\t\tラ\n"
+puts "\t\t\t\tレ\n"
+puts "\t\t\t\t\tナ\n"
+puts "\t\t\t\t\t\t〜\n"
+puts "\t\t\t\t\t\t\tイ"
+# 文字列の比較
 puts 'ruby' == 'ruby'
 puts 'ruby' == 'Ruby'
 puts 'ruby' != 'perl'
 puts 'ruby' != 'ruby'
+
+# %記法で文字列を作る
+# シングルクウォートやダブルクウォートをエスケープする必要がない
+# 区切り文字は ! ? ^ など任意の記号も使える
+# 区切り文字が < { ( [ の場合は終わりの区切り文字が対応するとじかっこ になる
+
+# %q! ! はシングルクウォートと同じ
+puts %q!He said , "Don't speak."!
+# %Q! ! はダブルクウォートと同じ
+something = 'Hello.'
+puts %Q!He said , "#{something}"!
+# %! ! はダブルクウォートと同じ
+something = 'Bye.'
+puts %!He said , "#{something}"!
+# ? を区切り文字として使う
+puts %q?He said , "Don't speak."?
+# {} を区切り文字として使う
+puts %q{He said , "Don't speak."}
 
 # ヒアドキュメント(行指向文字列リテラル)
 # 複数行に渡る長い文字列を作成する場合
@@ -60,12 +88,3 @@ puts 'Hi!' * 5
 puts String.new('hello')
 # ダブルクウォートと\uを組み合わせてUnicodeのコードポイントから文字列を作成
 puts "\u3042\u3044\u3046"
-
-puts "シ\n"
-puts "\tン\n"
-puts "\t\tジ\n"
-puts "\t\t\tラ\n"
-puts "\t\t\t\tレ\n"
-puts "\t\t\t\t\tナ\n"
-puts "\t\t\t\t\t\t〜\n"
-puts "\t\t\t\t\t\t\tイ"
