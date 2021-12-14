@@ -167,7 +167,7 @@ puts sum
 numbers = [1, 2, 3, 4]
 sum = numbers.inject(0) { |result, n| result + n }
 puts sum
-# ブロックの第一引数のresultmには初回のみinjectメソッドの引数０が入る
+# ブロックの第一引数のresultには初回のみinjectメソッドの引数０が入る
 # 2回目以降は前回のブロックの戻り値が入る
 # 繰り返し処理が最後まで終わると、ブロックの戻り値がinjectメソッドの戻り値になる
 # 例2) 文字列に対してinjectメソッドを使った場合
