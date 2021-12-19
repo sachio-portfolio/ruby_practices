@@ -408,15 +408,191 @@ puts sum #=> 64
 # end
 # 無限ループから脱出する場合はbreakを使う
 # 例) 配列に格納した5つの数値の中からランダムに数値を選び、5が出たタイミングで脱出する
-numbers = [1, 2, 3, 4, 5]
-loop do
-  n = numbers.sample
-  puts n
-  break if n == 5
-end
+# numbers = [1, 2, 3, 4, 5]
+# loop do
+#   n = numbers.sample
+#   puts n
+#   break if n == 5
+# end
 # while文で書くとこうなる
-while true
-  n = numbers.sample
+# while true
+#   n = numbers.sample
+#   puts n
+#   break if n == 5
+# end
+
+### 繰り返し処理用の制御構造
+# break next redo
+
+## breakを使うと繰り替えし処理を脱出することができる
+# 例) eachメソッドとbreakを組み合わせる
+# numbers = [1, 2, 3, 4, 5].shuffle
+# numbers.each do |n|
+#   puts n
+#   break if n == 5
+# end
+# breakはeachメソッドだけでなく、while文やuntil文、for文でも使える
+# 例) while文で上のコードを書き直すとこうなる
+numbers = [1, 2, 3, 4, 5].shuffle
+i = 0
+while i < numbers.size
+  n = numbers[i]
   puts n
   break if n == 5
+  i += 1
 end
+# breakに引数を渡すとwhile文やfor文の戻り値になる(渡さない場合nil)
+ret =
+  while true
+    break
+  end
+p ret #=> nil
+ret =
+  while true
+    break 123
+  end
+p ret #=> 123
+# 繰り返し処理が入れ子になっている場合は、一番内側の繰り返し処理を脱出する
+# fruits = ['apple', 'melon', 'orange']
+# numbers = [1, 2, 3]
+# fruits.each do |fruit|
+#   numbers.shuffle.each do |n|
+#     puts "#{fruit}, #{n}"
+#     break if n == 3
+#   end
+# end
+#=> apple, 2
+#   apple, 1
+#   apple, 3  3が出たらfruitの次の要素へ移っている
+#   melon, 2
+#   melon, 3
+#   orange, 2
+#   orange, 1
+#   orange, 3
+
+## throwとcatchを使った大域脱出(Kernelモジュール)
+# breakは一番内側の繰り返し処理しか脱出できませんが、
+# 一気に外側のループまで脱出したい場合、throwとcatchを使う
+# catch タグ do
+#   繰り返し処理など
+#   throw タグ
+# end
+# タグはシンボルで記載
+# throwとcatchのタグが一致しない場合はエラーになるので注意
+# 例) orangeと3の組み合わせが出たら全ての繰り返し処理を脱出する
+fruits = ['apple', 'melon', 'orange']
+numbers = [1, 2, 3]
+catch :done do
+  fruits.shuffle.each do |fruit|
+    numbers.shuffle.each do |n|
+      puts "#{fruit}, #{n}"
+      if fruit == 'orange' && n == 3
+        # 全ての繰り返し処理を脱出
+        throw :done
+      end
+    end
+  end
+end
+#=> orange, 2
+#   orange, 3
+
+## 繰り返し処理で使うbreakとreturnの違い
+# breakは「繰り返し処理からの脱出」、returnは「メソッドからの脱出」
+# 配列の中からランダムに1つの偶数を選び、その数を10倍にして返すメソッド
+# breakを使う場合
+def calc_with_break
+  numbers = [1, 2, 3, 4, 5]
+  target = nil
+  numbers.shuffle.each do |n|
+    target = n
+    break if n.even? # breakで脱出
+  end
+  target * 10
+end
+p calc_with_break #=> 40
+# returnを使う場合
+def calc_with_return
+  numbers = [1, 2, 3, 4, 5]
+  target = nil
+  numbers.shuffle.each do |n|
+    target = n
+    return if n.even?
+  end
+  target * 10
+end
+p calc_with_return #=> nil
+# 戻り値がnilなのはreturnが呼ばれた瞬間にメソッド全体を脱出してしまったから
+
+## nextは繰り返し処理を途中で中断し、次の処理に進む
+# 例) 偶数であれば処理を中断して、次の繰り返し処理に進む
+numbers = [1, 2, 3, 4, 5]
+numbers.each do |n|
+  next if n.even?
+  puts n
+end
+#=> 1
+#   3
+#   5
+# eachメソッドだけでなく、while文や、until文、for文の中でも使える
+numbers = [1, 2, 3, 4, 5]
+i = 0
+while i < numbers.size
+  n = numbers[i]
+  i += 1
+  next if n.even?
+  puts n
+end
+#=> 1
+#   3
+#   5
+# 入れ子になった繰り返し処理の場合は、一番内側のループだけ抜けるのはbreakと同じ
+fruits = ['apple', 'melon', 'orange']
+numbers = [1, 2, 3, 4]
+fruits.each do |fruit|
+  numbers.each do |n|
+    next if n.even?
+    puts "#{fruit}, #{n}"
+  end
+end
+#=> apple, 1
+#   apple, 3
+#   melon, 1
+#   melon, 3
+#   orange, 1
+#   orange, 3
+
+## redoは繰り返し処理をやり直したい場合に使う
+# 初回からやり直すのではなく、その回の繰り返し処理の最初に戻る
+# 例) 3つの野菜に対して、「好きですか？」と問いかけ、ランダムに「はい」または「いいえ」を答えるプログラム。ただし「はい」を答えるまで何度も同じ質問が続く
+foods = ['ピーマン', 'トマト', 'セロリ']
+foods.each do |food|
+  print "#{food}は好きですか？"
+  answer = ['はい', 'いいえ'].sample
+  puts answer
+  redo unless answer == 'はい'
+  count = 0
+end
+#=> ピーマンは好きですか？いいえ
+#   ピーマンは好きですか？いいえ
+#   ピーマンは好きですか？はい
+#   トマトは好きですか？いいえ
+#   トマトは好きですか？はい
+#   セロリは好きですか？はい
+# redoを使うと無限ループになる可能性があるので回数制限を考える
+# 無限ループにならないようにやり直しは2回までにする
+foods = ['ピーマン', 'トマト', 'セロリ']
+count = 0
+foods.each do |food|
+  print "#{food}は好きですか？"
+  answer = 'いいえ'
+  puts answer
+  count += 1
+  redo if answer != 'はい' && count < 2
+  count = 0
+end
+#=> ピーマンは好きですか？いいえ
+#   ピーマンは好きですか？いいえ
+#   トマトは好きですか？いいえ
+#   トマトは好きですか？いいえ
+#   セロリは好きですか？いいえ
+#   セロリは好きですか？いいえ
