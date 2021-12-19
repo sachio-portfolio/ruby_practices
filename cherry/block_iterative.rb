@@ -283,3 +283,140 @@ san_names = names.map do |name|
   "#{name}さん"
 end.join('と')
 p san_names #=> "田中さんと鈴木さんと佐藤さん"
+
+### さまざまな繰り返し処理
+## timesメソッド(Integerクラス)
+# 配列を使わず、単純にn回処理を空理返したい、という場合はtimesメソッド
+sum = 0
+5.times { |n| sum += n }
+p sum #=> 10
+# ブロック引数を使わない場合省略しても良い
+sum = 0
+5.times { sum += 1 }
+p sum #=> 5
+
+## uptoメソッドとdowntoメソッド(Integerクラス)
+# nからmまで数値を1つずつ増やしながら何か処理をしたい場合はuptoメソッド
+a = []
+10.upto(14) { |n| a << n }
+p a #=> [10, 11, 12, 13, 14]
+# 逆に数値を減らしていきたい場合はdowntoメソッド
+a = []
+14.downto(10) { |n| a << n }
+p a #=> [14, 13, 12, 11, 10]
+
+## stepメソッド(Numericクラス)
+# 1, 3, 5, 7のようにnからmまで数値をx個ずつ増やしながら何か処理をしたい場合はstepメソッド
+# 開始値.step(上限値, 1度に増減する大きさ)
+# 1から10まで2ずつ増やしながら処理
+a = []
+1.step(10, 2) { |n| a << n }
+p a #=> [1, 3, 5, 7, 9]
+# 10から1まで2ずつ値を減らす場合の処理
+a = []
+10.step(1, -2) { |n| a << n }
+p a #=> [10, 8, 6, 4, 2]
+
+## while文とuntil文
+# while文は指定した条件が真である間、処理を繰り返す
+# while 条件式(真であれば実行)
+#   繰り返したい処理
+# end
+# 配列の要素数が5つになるまで値を追加するwhile文
+a = []
+while a.size < 5
+  a << 1
+end
+p a #=> [1, 1, 1, 1, 1]
+# 条件式の後ろにdoを入れると1行で書くこともできる
+a = []
+while a.size < 5 do a << 1 end
+p a #=> [1, 1, 1, 1, 1]
+# 1行で書くなら修飾子としてwhile文を後ろに置いた方がスッキリかける
+a = []
+a << 1 while a.size < 5
+p a #=> [1, 1, 1, 1, 1]
+# どんな条件でも最低1回は実行したい、という場合begin...endで囲んでwhileを書く
+a = []
+while false
+  a << 1
+end
+p a #=> []  このコードは常に偽になるので実行されない
+# begin...endで囲む
+begin
+  a << 1
+end while false
+p a #=> [1] どんな条件でも最低1回は実行される
+
+# until文はwhile文の反対で、条件が義である間処理を繰り返す
+# until 条件式(偽であれば実行)
+#   繰り返したい処理
+# end
+# 配列の要素数が3以下になるまで配列の要素を後ろから削除していく
+a = [10, 20, 30, 40, 50]
+until a.size <= 3
+  a.delete_at(-1)
+end
+p a #=> [10, 20, 30]
+
+# for文は配列やハッシュを繰り返し処理する
+# for 変数 in 配列やハッシュ
+#   繰り返し処理
+# end
+# 配列の中身を順に加算していく
+numbers = [1, 2, 3, 4]
+sum = 0
+for n in numbers
+  sum += n
+end
+p sum #=> 10
+# doを入れて1行でもかける
+sum = 0
+for n in numbers do sum += n end
+p sum #=> 10
+# 上記のfor文はeachメソッドとほぼ同じ
+# Rubyではeachメソッドを使う
+# 厳密には同じではなくfor文は配列の要素を受け取る変数や、for文の中で作成したローカル変数がfor文の外でも使えるという違いがある
+# 例)eachの場合
+numbers = [1, 2, 3, 4]
+sum = 0
+numbers.each do |n|
+  sum_value = n.even? ? n * 10 : n
+  sum += sum_value
+end
+# puts n #=> undefined local variable or method `n' for main:Object (NameError)
+# puts sum_value #=> undefined local variable or method `sum_value' for main:Object (NameError)
+puts sum #=> 64
+# for文の場合
+sum = 0
+for n in numbers
+  sum_value = n.even? ? n * 10 : n
+  sum += sum_value
+end
+puts n #=> 4
+puts sum_value #=> 40
+puts sum #=> 64
+
+## loopメソッド
+# あえて無限ループを作りたい場合whileだと以下のようにかける
+# while true
+#   無限ループの処理
+# end
+# Kernelモジュールのloopメソッドとブロックを使う場合
+# loop do
+#   無限ループ処理
+# end
+# 無限ループから脱出する場合はbreakを使う
+# 例) 配列に格納した5つの数値の中からランダムに数値を選び、5が出たタイミングで脱出する
+numbers = [1, 2, 3, 4, 5]
+loop do
+  n = numbers.sample
+  puts n
+  break if n == 5
+end
+# while文で書くとこうなる
+while true
+  n = numbers.sample
+  puts n
+  break if n == 5
+end
