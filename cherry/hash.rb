@@ -120,5 +120,61 @@ symbol = :apple
 # シンボルがよく使われるのは、ソースコード上では名前を識別できるようにしたいが、
 # その名前が必ずしも文字列である必要のない場合
 # 例) ハッシュのキー (文字列よりも高速に値を取り出せる)
+currensies = { :japan => 'yen', :us => 'dollar', :india => 'rupee' }
+puts currensies #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+
+## ハッシュのキーにシンボルを使う場合、=> を使わずに "シンボル: 値" という記法でハッシュを作成できる
 currensies = { japan: 'yen', us: 'dollar', india: 'rupee' }
 puts currensies #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+# 値を取り出すときは同じ
+puts currensies[:us] #=> dollar
+
+# キーも値もシンボルの場合
+currensies = { japan: :yen, us: :dollar, india: :rupee }
+# 上のハッシュは下のハッシュと同じ意味
+currensies = { :japan => :yen, :us => :dollar, :india => :rupee }
+
+# ハッシュに格納する値は異なるデータ型が混在するケースもよくある
+person = {
+  name: 'Alice', # 値が文字列
+  age: 20, # 値が数値
+  friends: ['Bob', 'Carol'], # 値が配列
+  phones: { home: '1234-0000', mobile: '5678-0000'}  # 値がハッシュ
+}
+p person[:name] #=> "Alice"
+p person[:age] #=> 20
+p person[:friends] #=> ["Bob", "Carol"]
+p person[:phones] #=> {:home=>"1234-0000", :mobile=>"5678-0000"}
+
+## メソッドのキーワード引数とハッシュ
+# メソッドに引数を渡す場合、どの引数がどんな意味を持つのかが分かりづらい時がある
+# そういうケースではメソッドのキーワード引数を使うと可読性が上がる
+# 例)
+# def メソッド名(キーワード引数1: デフォルト値1)
+#   メソッドの処理
+# end
+def buy_burger(menu, drink: true, potato: true)
+  if drink && potato
+    puts "#{menu}バーガーとドリンクとポテトを購入"
+  elsif drink
+    puts "#{menu}バーガーとドリンクを購入"
+  elsif potato
+    puts "#{menu}バーガーとポテトを購入"
+  end
+end
+# キーワード引数を使う場合
+buy_burger('cheese', drink: true, potato: true) #=> cheeseバーガーとドリンクとポテトを購入
+buy_burger('fish', drink: false, potato: true) #=> fishバーガーとポテトを購入
+buy_burger('ebi', drink: true, potato: false) #=> ebiバーガーとドリンクを購入
+# キーワード引数にはデフォルト値が設定されているので、引数を省略できる
+buy_burger('cheese') #=> cheeseバーガーとドリンクとポテトを購入
+# キーワード引数は呼び出し時に自由に順番を入れ替えできる
+buy_burger('fish', potato: false, drink: true) #=> fishバーガーとドリンクを購入
+# 存在しないキーワードを呼び出した場合はエラーになる
+# buy_burger('ebi', salada: true, potato: false) #=> `buy_burger': unknown keyword: :salada (ArgumentError)
+# キーワード引数のデフォルト値は省略することもできる
+# その場合、呼び出し時に省略できない
+# def buy_burger(menu, drink:, potato:)
+#   # 省略
+# end
+# buy_burger('ebi', potato: false) #=> `buy_burger': missing keywords: :drink, :potato (ArgumentError)
