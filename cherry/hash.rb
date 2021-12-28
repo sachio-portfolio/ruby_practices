@@ -178,3 +178,45 @@ buy_burger('fish', potato: false, drink: true) #=> fishバーガーとドリン�
 #   # 省略
 # end
 # buy_burger('ebi', potato: false) #=> `buy_burger': missing keywords: :drink, :potato (ArgumentError)
+
+### ハッシュで使用頻度の高いメソッド
+## keys
+# keysメソッドはハッシュのキーを配列として返す
+currencies = { japan: 'yen', us: 'dollar', india: 'rupee'}
+p currencies.keys #=> [:japan, :us, :india]
+
+## values
+# valuesメソッドはハッシュの値を配列として返す
+p currencies.values #=> ["yen", "dollar", "rupee"]
+
+## has_key? / key? / include? / member?
+# これらのメソッドはハッシュの中に指定されたキーが存在するかどうか確認するメソッド
+p currencies.has_key?(:japan) #=> true
+
+## **ででハッシュを展開できる
+h = { us: 'dollar', india: 'rupee'}
+h2 = { japan: 'yen', **h }
+p h2 #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+# mergeメソッドでも同じ結果になる
+h2 = { japan: 'yen' }.merge(h)
+p h2 #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+
+## 擬似キーワード引数のコード例
+# 昔から引き継いでいるコードはこういう書き方になっているかも
+# def buy_burger(menu, options = {})
+#   drink = options[:drink]
+#   potato = options[:potato]
+#   # 省略
+# end
+# buy_burger('cheese', drink: true, potato: true) #=> cheeseバーガーとドリンクとポテトを購入
+
+## 任意のキーワードを受け取る
+# **をつけた引数を最後に用意する
+# **をつけた引数にはキーワード引数で指定されたいないキーワードがハッシュとして格納れる
+def buy_burger(menu, drink: true, potato: true, **others)
+  puts others
+end
+buy_burger('fish', drink: true, potato: false, salada: true, chicken: false) #=> {:salada=>true, :chicken=>false}
+
+## 最後の引数がハッシュであればハッシュリテラルの{}を省略できる
+# 上記のように。。。
