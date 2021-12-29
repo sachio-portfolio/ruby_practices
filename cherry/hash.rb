@@ -134,6 +134,54 @@ currensies = { japan: :yen, us: :dollar, india: :rupee }
 # 上のハッシュは下のハッシュと同じ意味
 currensies = { :japan => :yen, :us => :dollar, :india => :rupee }
 
+## シンボルを作成する様々な方法
+# コロン(:)に続けて、変数名やクラス名、メソッド名の識別子として有効な文字列を書く
+# 例)
+:apple
+:Apple
+:ruby_is_fun
+:okay?
+:welcome!
+:_secret
+:$dollar
+:@at_mark
+# 識別子として無効な文字を使うとエラーになる
+# 但し、下記の場合もシングルクウォートで囲むとシンボルとして有効
+# :12345 # 数値
+# :ruby-is-fun # ハイフン
+# :ruby is fun # スペース
+# :() # 記号
+# ダブルクウォートを使うと式展開を使うことができる
+name = 'Alice'
+:"#{name.upcase}"
+
+# %記法でシンボルやシンボルの配列を作る
+# シンボルを作成する場合は%s
+p %s!ruby is fun! #=> :"ruby is fun"
+p %s(ruby is fun) #=> :"ruby is fun"
+# シンボルの配列を作成する場合には%iを使う
+p %i(apple orange melon) #=> [:apple, :orange, :melon]
+
+# 改行を含めたり式展開する場合は%Iを使う
+p %I(hello\ngood-by #{name.upcase}) #=> [:"hello\ngood-by", :ALICE]
+
+## シンボルと文字列の関係
+# シンボルと文字列は見た目は似ていても別物
+'apple' == :apple #=> false
+# 但し、to_symメソッド(internメソッド)を使うと文字列をシンボルに変換できる
+p 'apple'.to_sym #=> :apple
+# 反対にto_sメソッド(id2name)でシンボルを文字列に変換できる
+p :apple.to_s #=> "apple"
+
+# メソッドによっては文字列とシンボルを同等に扱うものもある
+# 例) respond_to?メソッド
+# オブジェクトに対して、文字列またはシンボルで指定した名前のメソッドを呼びさせるかどうかを調べることができる
+puts 'apple'.respond_to?('include?') #=> true
+puts 'apple'.respond_to?(:include?) #=> true
+# しかし、一般的には同等に扱わないケースの方が多い
+puts 'apple'.include?('pp') #=> true
+puts 'apple'.include?(:pp) #=> `include?': no implicit conversion of Symbol into String (TypeError)
+
 # ハッシュに格納する値は異なるデータ型が混在するケースもよくある
 person = {
   name: 'Alice', # 値が文字列
@@ -220,3 +268,75 @@ buy_burger('fish', drink: true, potato: false, salada: true, chicken: false) #=>
 
 ## 最後の引数がハッシュであればハッシュリテラルの{}を省略できる
 # 上記のように。。。
+
+## ハッシュから配列、配列からハッシュ
+# ハッシュに対してto_a メソッドを使うと配列に変換できる
+# キーと値が1つの配列に入り、さらにそれが複数並ぶ多次元配列になる
+currencies = { japan: 'yen', us: 'dollar', india: 'rupee'}
+p currencies.to_a #=> [[:japan, "yen"], [:us, "dollar"], [:india, "rupee"]]
+
+# 配列に対してto_hメソッドを使うとハッシュに変換できる
+p [[:japan, "yen"], [:us, "dollar"], [:india, "rupee"]].to_h #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+
+# ハッシュとして解析不能な配列に対してto_hメソッドを使うとエラーになる
+# p [1, 2, 3, 4].to_h #=> `to_h': wrong element type Integer at 0 (expected array) (TypeError)
+
+# キーが重複した場合は最後に登場した配列の要素がハッシュの値に変換される
+p [[:japan, 'yen'], [:japan, '円']].to_h #=> {:japan=>"円"}
+
+## Hash[array]で作成する
+# Ruby2.1より前はキーと値のペアの配列をHash[]に渡していた
+array = [[:japan, "yen"], [:us, "dollar"], [:india, "rupee"]]
+p Hash[array] #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+
+# キーと値が交互に並ぶフラットな配列をsplat展開しても良い
+array = [:japan, "yen", :us, "dollar", :india, "rupee"]
+p Hash[*array] #=> {:japan=>"yen", :us=>"dollar", :india=>"rupee"}
+
+## ハッシュの初期値を理解する
+# ハッシュに対して存在しないキーを指定するとnilが返却される
+h = {}
+p h[:foo] #=> nil
+# nil以外の値を返したい時は、Hash.newでハッシュを作成し、引数に初期値となる値を指定する
+h = Hash.new('hello')
+p h[:foo] #=> "hello"
+# 配列の初期値と同様、newの引数として初期値を設定した場合、初期値として毎回同じオブジェクトが返却される
+# 初期値に破壊的な変更を適用すると、他の要素の値も一緒に変わってしまう
+h = Hash.new('hello')
+a = h[:foo] #=> "hello"
+b = h[:bar] #=> "hello"
+# aとbは同一オブジェクト
+puts a.object_id #=> 120
+puts b.object_id #=> 120
+puts a.equal?(b) #=> true
+
+# 変数aに破壊的な変更を適用すると、変数bの値も変わってしまう
+a.upcase!
+puts a #=> HELLO
+puts b #=> HELLO
+# ちなみにハッシュ自身は空のまま
+puts h #=> {}
+
+# 文字列や配列など、ミュータブルなオブジェクトを初期値として返す場合
+# Hash.newとブロックを組み合わせて初期値を返すと全て違うオブジェクトになる
+h = Hash.new { 'hello' }
+a = h[:foo] #=> "hello"
+b = h[:bar] #=> "hello"
+# aとbは異なるオブジェクト
+puts a.object_id #=> 140
+puts b.object_id #=> 160
+puts a.equal?(b) #=> false
+# 変数aに破壊的な変更を適用しても、変数bの値は変化しない
+a.upcase!
+puts a #=> HELLO
+puts b #=> hello
+# ちなみにハッシュ自身は空のまま
+puts h #=> {}
+
+# Hash.newにブロックを与えると、ブロック引数としてハッシュ自身と見つからなかったキーが渡される
+# このブロックを使って、ハッシュにキーと初期値も同時に設定するコードもよく使われる
+h = Hash.new { |hash, key| hash[key] = 'hello' }
+p h[:foo] #=> "hello"
+p h[:bar] #=> "hello"
+# ハッシュにキーと値が追加されている
+p h #=> {:foo=>"hello", :bar=>"hello"}
