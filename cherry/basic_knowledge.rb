@@ -102,3 +102,110 @@ irb(main):010:0> print a
 irb(main):011:0> p a
 [1, 2, 3]
 => [1, 2, 3]
+# ハッシュを渡した場合
+irb(main):011:0> h = {a: 1, b: 2, c: 3}
+=> {:a=>1, :b=>2, :c=>3}
+irb(main):012:0> puts h
+{:a=>1, :b=>2, :c=>3}
+=> nil
+irb(main):013:0> print h
+{:a=>1, :b=>2, :c=>3}=> nil
+irb(main):014:0> p h
+{:a=>1, :b=>2, :c=>3}
+=> {:a=>1, :b=>2, :c=>3}
+
+
+### よく使われるイディオム
+
+## メソッド定義時の引数の順番
+# メソッドの引数にはたくさんの種類があるが、これらを組み合わせてメソッドを定義する場合、その種類ごとに並ぶ順番が決まっているので注意
+・通常の引数
+・デフォルト値付きの引数
+・可変長引数(1つだけ)
+・通常の引数
+・キーワード引数
+・**を使った任意キーワード引数(1つだけ)
+・&を使ったブロックを受け取る引数(1つだけ)
+
+## 条件分岐で変数に代入 / &.演算子(ぼっち演算子)
+# 変数への代入と条件分岐を同時に実現するイディオム
+# 例) 国名に応じて通貨を大文字にして返す(該当する通貨がなければnil)
+def find_currency(country)
+  currencies = { japan: 'yen', us: 'dollar', india: 'rupee'}
+  currencies[country]
+end
+def show_currency(country)
+  currency = find_currency(country)
+  if currency
+    currency.upcase
+  end
+end
+puts show_currency(:japan) #=> YEN
+puts show_currency(:brazil) #=> nil
+# ↓ ↓ ↓
+# Rubyでは変数への代入自体が戻り値を持つため、次のようにif文の中で直接変数に代入することも可能
+def show_currency_2(country)
+  currency = find_currency(country)
+  # 条件分岐で直接変数に代入(値が取得できれば真、できなければ偽)
+  if currency = find_currency(country)
+    currency.upcase
+  end
+end
+# ↓ ↓ ↓
+# nilかもしれないオブジェクトに対して安全にメッソッドを呼び出したい場合、Ruby2.3から登場した&.(ぼっち演算子)を使うこともできる
+# &.を使ってメソッドを呼び出すと、メソッドを呼び出されたオブジェクトがnilでない場合はその結果を、nilだった場合はnilを返却する
+def show_currency_2(country)
+  currency = find_currency(country)
+  # currencyがnilの場合を考慮して、&.演算子でメソッドを呼び出す
+  currency&.upcase
+end
+
+## ||= を使った自己代入
+# Rubyでは以下のようなコードをよく見かける
+limit ||= 10
+# このコードは変数limitがnilかfalseであれば、10を代入する
+# それ以外はlimitの値をそのまま使うという意味
+limit = nil
+limit ||= 10
+limit #=> 10
+limit = 20
+limit ||= 10
+limit #=> 20
+# なぜ上記のようになるか展開するとよくわかる
+limit = limit || 10
+
+## !!を使った真偽値の型変換
+# 確実にtrueまたはfalseを返すイディオム
+# Rubyではnilまたはfalseであれば偽、それ以外は真
+# 自分で?で終わるメソッドを定義する際に、確実にtrueまたはfalseだけを返すようにしたいと思った場
+# 例) データベースなどからユーザを探す(なければnil)
+def userr_exists?
+  user = find_user
+  if user
+    true
+  else
+    false
+  end
+end
+# ↓ ↓ ↓
+# 上記のコードをコンパクトに書くと...
+def userr_exists?
+  !!find_user
+end
+# !は否定の演算子
+# falseにつけるとtrueに、trueにつけるとfalseになる
+irb(main):008:0> !false
+=> true
+irb(main):009:0> !true
+=> false
+# 否定演算子を2つつけると元のオブジェクトに対する真偽値を得ることができる
+irb(main):001:0> !!true
+=> true
+irb(main):002:0> !!1
+=> true
+irb(main):003:0> !!false
+=> false
+irb(main):004:0> !!nil
+=> false
+irb(main):005:0> !!'a'
+=> true
